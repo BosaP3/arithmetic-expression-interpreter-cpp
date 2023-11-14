@@ -1,8 +1,9 @@
-//*****testing*****
+//*****test****
+#include <sstream>
 
-#include <string>
-
-double test(const std::string &str)
+bool isNumber(const std::string &s)
 {
-    return 1;
+    std::istringstream iss(s);
+    double value;
+    return iss >> value >> std::ws && iss.eof();
 }
