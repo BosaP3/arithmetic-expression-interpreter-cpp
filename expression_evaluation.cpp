@@ -14,6 +14,49 @@ bool isNumber(const std::string &s)
     return iss >> value >> std::ws && iss.eof();
 }
 
+bool isVariable(const std::string &var)
+{
+    return variables.find(var) != variables.end();
+}
+
+bool isOperator(const char &op)
+{ // é Operador
+    return op == '+' || op == '-' || op == '*' || op == '/';
+}
+
+void evaluation_Expression(const std::string &input)
+{
+    std::istringstream stream(input); //Cria um fluxo de string
+    std::string token;
+    while (stream >> token)
+    {
+        if (isOperator(token[0]))
+        {
+            // pushOperator(token[0]);
+        }
+        else if (isVariable(token))
+        {
+            double value = variables[token];
+            // pushOperand(value);
+        }
+        else
+        {
+            try
+            {
+                double value = std::stod(token);
+                // pushOperand(value);
+            }
+            catch (const std::invalid_argument &e)
+            {
+                std::cerr << "Erro: Valor invalido na expressao.\nOu\nErro: Variavel nao encontrada; \n"
+                          << std::endl;
+                // return NAN; **criar tratamento na main**
+            }
+        }
+    }
+    // evaluateFinal(); //tree
+}
+
 void evaluation_Variable(const std::string &input)
 {
     size_t pos = input.find("="); // encontra o sinal
@@ -34,6 +77,6 @@ void evaluation(const std::string &input)
         std::cout << variables[input] << std::endl;
     else // teste de expressao
     {
-        // return evaluation_Expression(input); // Em caso de "input" função...
+        evaluation_Expression(input); // Em caso de "input" função...
     }
 }
