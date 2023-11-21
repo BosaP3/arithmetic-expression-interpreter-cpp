@@ -1,9 +1,10 @@
 //*****test****
 #include <sstream>
-#include <iostream>
 #include <unordered_map>
 #include <cmath>
 #include <string>
+
+#include "expression_tree.cpp"
 
 std::unordered_map<std::string, double> variables;
 
@@ -26,8 +27,15 @@ bool isOperator(const char &op)
 
 void evaluation_Expression(const std::string &input)
 {
-    std::istringstream stream(input); //Cria um fluxo de string
+    std::istringstream stream(input); // Cria um fluxo de string
     std::string token;
+
+    // verificar antes: parenteses alinhados,
+    // verificar variavel nãio declarada
+    // caractere invalido
+
+    // montar expressao na arvore usando stack
+    //
     while (stream >> token)
     {
         if (isOperator(token[0]))
