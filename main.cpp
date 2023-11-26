@@ -8,7 +8,8 @@ int main()
 {
     string user_input;
 
-    // Interface REPL (Read-Eval-Print-Loop) *****testing*****
+    // Interface REPL (Read-Eval-Print-Loop)
+    cout << "OBS: Digite as expressoes usando espaços como delimitador. \n";
     while (1)
     {
         cout << ">>> ";
@@ -17,7 +18,7 @@ int main()
         if (user_input == "exit")
             break;
 
-        evaluation(user_input); // manda a entrada para avaliação
+        evaluation(user_input); // avaliação de entrada
     }
 
     return 0;

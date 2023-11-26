@@ -1,10 +1,15 @@
-//*****test****
 #include <sstream>
 #include <unordered_map>
 #include <cmath>
 #include <string>
+#include <vector>
+// #include "expression_tree.cpp"
 
-#include "expression_tree.cpp"
+struct valueOperator
+{
+    std::string op;
+    double val;
+};
 
 std::unordered_map<std::string, double> variables;
 
@@ -20,71 +25,107 @@ bool isVariable(const std::string &var)
     return variables.find(var) != variables.end();
 }
 
-bool isOperator(const char &op)
-{ // é Operador
-    return op == '+' || op == '-' || op == '*' || op == '/';
+bool isOperator(std::string str)
+{
+    return str == "+" || str == "-" || str == "*" || str == "/";
 }
 
-void evaluation_Expression(const std::string &input)
-{
-    std::istringstream stream(input); // Cria um fluxo de string
-    std::string token;
+std::vector<valueOperator> expressionParts(const std::string &input)
+{ // Divide a expressão em partes
+    std::vector<valueOperator> Parts;
+    std::string currentPart;
 
-    // verificar antes: parenteses alinhados,
-    // verificar variavel nãio declarada
-    // caractere invalido
-
-    // montar expressao na arvore usando stack
-    //
-    while (stream >> token)
+    // testar parenteses **
+    for (char c : input) // separa os valores usando espaços delimitador
     {
-        if (isOperator(token[0]))
+        if (!std::isspace(c)) // Ignorar espaços em branco
         {
-            // pushOperator(token[0]);
+            currentPart += c;
         }
-        else if (isVariable(token))
+        else if (!currentPart.empty())
         {
-            double value = variables[token];
-            // pushOperand(value);
-        }
-        else
-        {
-            try
+            if (isNumber(currentPart))
             {
-                double value = std::stod(token);
-                // pushOperand(value);
+                valueOperator item;
+                item.val = std::stod(currentPart);
+                Parts.push_back(item);
             }
-            catch (const std::invalid_argument &e)
+            else if (isOperator(currentPart))
+            {
+                valueOperator item;
+                item.op = currentPart;
+                Parts.push_back(item);
+            }
+            else if (variables.find(currentPart) != variables.end())
+            {
+                valueOperator item;
+                item.val = variables[currentPart];
+                Parts.push_back(item);
+            }
+            else
             {
                 std::cerr << "Erro: Valor invalido na expressao.\nOu\nErro: Variavel nao encontrada; \n"
                           << std::endl;
-                // return NAN; **criar tratamento na main**
             }
+            currentPart.clear();
         }
     }
-    // evaluateFinal(); //tree
+    if (!currentPart.empty()) // Ultima parte
+    {
+        if (isNumber(currentPart))
+        {
+            valueOperator item;
+            item.val = std::stod(currentPart);
+            Parts.push_back(item);
+        }
+        else if (isOperator(currentPart))
+        {
+            valueOperator item;
+            item.op = currentPart;
+            Parts.push_back(item);
+        }
+        else if (variables.find(currentPart) != variables.end())
+        {
+            valueOperator item;
+            item.val = variables[currentPart];
+            Parts.push_back(item);
+        }
+        else
+        {
+            std::cerr << "Erro: Valor invalido na expressao.\nOu\nErro: Variavel nao encontrada; \n"
+                      << std::endl;
+        }
+        currentPart.clear();
+    }
+    return Parts; // Retorna um vector expressionParts
 }
 
 void evaluation_Variable(const std::string &input)
 {
-    size_t pos = input.find("="); // encontra o sinal
+    size_t pos = input.find("=");
     std::string var = input.substr(0, pos);
     double value = std::stod(input.substr(pos + 1));
-    variables[var] = value; // guarda no map
+    variables[var] = value; // Guarda no map
 
-    // testar se o valor depois do sinal é uma expressao e resolver
+    // Testar se o valor depois do sinal é uma expressao e resolver
 }
 
 void evaluation(const std::string &input)
 {
-    if (isNumber(input)) // teste se for somente um numero
+    if (isNumber(input)) // Se for numero
         std::cout << input << std::endl;
-    else if (input.find('=') != std::string::npos) // teste se é variavel
+    else if (input.find('=') != std::string::npos) // Se é variavel
         evaluation_Variable(input);
-    else if (variables.find(input) != variables.end()) // teste de chave mapeada
+    else if (variables.find(input) != variables.end()) // Se for chave mapeada
         std::cout << variables[input] << std::endl;
-    else // teste de expressao
+    else // Teste de expressao
     {
-        evaluation_Expression(input); // Em caso de "input" função...
+        for (const auto &item : expressionParts(input))
+        {
+            if (!item.op.empty())
+                std::cout << "Operador " << item.op << std::endl;
+            else
+                std::cout << "Valor " << item.val << std::endl;
+        }
     }
 }
