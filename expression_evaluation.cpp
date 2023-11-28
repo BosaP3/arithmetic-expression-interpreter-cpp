@@ -1,18 +1,11 @@
-#include <sstream>
 #include <unordered_map>
-#include <cmath>
 #include <string>
-#include <vector>
-// #include "expression_tree.cpp"
+#include <sstream>
+#include "expression_tree.cpp"
 
-struct valueOperator
-{
-    std::string op;
-    double val;
-};
+std::unordered_map<std::string, std::string> variables;
 
-std::unordered_map<std::string, double> variables;
-
+// Verifica se a entrada pode ser convertida para um double
 bool isNumber(const std::string &s)
 {
     std::istringstream iss(s);
@@ -20,112 +13,111 @@ bool isNumber(const std::string &s)
     return iss >> value >> std::ws && iss.eof();
 }
 
+// Verifica se a entrada já foi mapeada
 bool isVariable(const std::string &var)
 {
     return variables.find(var) != variables.end();
 }
 
+// Verifica se a entrada é um operador valido
 bool isOperator(std::string str)
 {
     return str == "+" || str == "-" || str == "*" || str == "/";
 }
 
-std::vector<valueOperator> expressionParts(const std::string &input)
-{ // Divide a expressão em partes
-    std::vector<valueOperator> Parts;
+// Recebe e percorre uma String para analisar e/ou adaptar os parametros corretos de uma Expressõe Aritmética
+std::string validExpression(const std::string &input)
+{
+    std::string correct;
     std::string currentPart;
 
-    // testar parenteses **
-    for (char c : input) // separa os valores usando espaços delimitador
+    // Dividir a expressão pelos espaços
+    std::stringstream ss(input);
+    std::string element;
+
+    // Contador de parênteses abertos
+    int ParenthesesCount = 0;
+
+    while (ss >> element)
     {
-        if (!std::isspace(c)) // Ignorar espaços em branco
+        if (!element.empty())
         {
-            currentPart += c;
-        }
-        else if (!currentPart.empty())
-        {
-            if (isNumber(currentPart))
-            {
-                valueOperator item;
-                item.val = std::stod(currentPart);
-                Parts.push_back(item);
+            if (isNumber(element) || isOperator(element))
+            { // Operando / Operador
+                correct += element + " ";
             }
-            else if (isOperator(currentPart))
-            {
-                valueOperator item;
-                item.op = currentPart;
-                Parts.push_back(item);
+            else if (isVariable(element))
+            {                                        //  Variavel
+                correct += variables[element] + " "; // Passa o valor da variável
             }
-            else if (variables.find(currentPart) != variables.end())
+            else if (element == "(")
+            { // Parenteses
+                ParenthesesCount++;
+                correct += element + " ";
+            }
+            else if (element == ")")
             {
-                valueOperator item;
-                item.val = variables[currentPart];
-                Parts.push_back(item);
+                if (ParenthesesCount > 0)
+                {
+                    ParenthesesCount--;
+                    correct += element + " ";
+                }
             }
             else
             {
-                std::cerr << "Erro: Valor invalido na expressao.\nOu\nErro: Variavel nao encontrada; \n"
-                          << std::endl;
+                std::cerr << "Erro: Valor invalido encontrado." << std::endl;
             }
-            currentPart.clear();
         }
     }
-    if (!currentPart.empty()) // Ultima parte
+    // Verificação de parênteses desalinhados
+    if (ParenthesesCount > 0)
     {
-        if (isNumber(currentPart))
-        {
-            valueOperator item;
-            item.val = std::stod(currentPart);
-            Parts.push_back(item);
-        }
-        else if (isOperator(currentPart))
-        {
-            valueOperator item;
-            item.op = currentPart;
-            Parts.push_back(item);
-        }
-        else if (variables.find(currentPart) != variables.end())
-        {
-            valueOperator item;
-            item.val = variables[currentPart];
-            Parts.push_back(item);
-        }
-        else
-        {
-            std::cerr << "Erro: Valor invalido na expressao.\nOu\nErro: Variavel nao encontrada; \n"
-                      << std::endl;
-        }
-        currentPart.clear();
+        std::cerr << "Erro: Parenteses desbalanceados." << std::endl;
     }
-    return Parts; // Retorna um vector expressionParts
+
+    return correct;
 }
 
+// Recebe e guarda uma variavel no unordered_map
 void evaluation_Variable(const std::string &input)
 {
     size_t pos = input.find("=");
     std::string var = input.substr(0, pos);
-    double value = std::stod(input.substr(pos + 1));
-    variables[var] = value; // Guarda no map
+    std::string value = input.substr(pos + 1);
 
-    // Testar se o valor depois do sinal é uma expressao e resolver
+    // remove as ocorrencias dos "caracteres"
+    var.erase(var.find_last_not_of(" \t\n\r\f\v") + 1);
+    value.erase(0, value.find_first_not_of(" \t\n\r\f\v"));
+
+    if (variables.find(value) != variables.end())
+    {
+        value = variables[value];
+        variables[var] = value;
+    }
+    else if (value.find_first_of("+-*/()") != std::string::npos)
+    {
+        Node *raiz = buildExpression(validExpression(value));
+        double result = calculateResult(raiz);
+        variables[var] = std::to_string(result);
+    }
+    else
+    {
+        variables[var] = value;
+    }
 }
 
+// Coordena a avaliação da entrada
 void evaluation(const std::string &input)
 {
-    if (isNumber(input)) // Se for numero
+    if (isNumber(input)) // Numero
         std::cout << input << std::endl;
-    else if (input.find('=') != std::string::npos) // Se é variavel
+    else if (input.find('=') != std::string::npos) // Variavel
         evaluation_Variable(input);
-    else if (variables.find(input) != variables.end()) // Se for chave mapeada
+    else if (variables.find(input) != variables.end()) // Chave mapeada
         std::cout << variables[input] << std::endl;
-    else // Teste de expressao
+    else // Expressao
     {
-        for (const auto &item : expressionParts(input))
-        {
-            if (!item.op.empty())
-                std::cout << "Operador " << item.op << std::endl;
-            else
-                std::cout << "Valor " << item.val << std::endl;
-        }
+        Node *raiz = buildExpression(validExpression(input));
+        std::cout << calculateResult(raiz) << std::endl;
     }
 }
