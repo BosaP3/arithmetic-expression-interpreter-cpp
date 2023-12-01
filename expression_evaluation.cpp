@@ -67,6 +67,7 @@ std::string validExpression(const std::string &input)
             else
             {
                 return "ERRO1";
+
             }
         }
     }
