@@ -67,12 +67,11 @@ std::string validExpression(const std::string &input)
             else
             {
                 return "ERRO1";
-
             }
         }
     }
     // Verificação de parênteses desalinhados
-    if (ParenthesesCount > 0)
+    if (ParenthesesCount != 0)
     {
         return "ERRO2";
     }
@@ -98,9 +97,17 @@ void evaluation_Variable(const std::string &input)
     }
     else if (value.find_first_of("+-*/()") != std::string::npos)
     {
-        Node *raiz = buildExpression(validExpression(value));
-        double result = calculateResult(raiz);
-        variables[var] = std::to_string(result);
+        std::string test = validExpression(value);
+        if (test == "ERRO1")
+            std::cout << "Erro: Valor invalido encontrado." << std::endl;
+        else if (test == "ERRO2")
+            std::cout << "ERRO: Parenteses desbalanceados." << std::endl;
+        else
+        {
+            Node *raiz = buildExpression(test);
+            double result = calculateResult(raiz);
+            variables[var] = std::to_string(result);
+        }
     }
     else
     {
@@ -117,14 +124,14 @@ void evaluation(const std::string &input)
         std::cout << variables[input] << std::endl;
     else // Expressao
     {
-        std::string teste = validExpression(input);
-        if (teste == "ERRO1")
+        std::string test = validExpression(input);
+        if (test == "ERRO1")
             std::cout << "Erro: Valor invalido encontrado." << std::endl;
-        else if (teste == "ERRO2")
+        else if (test == "ERRO2")
             std::cout << "ERRO: Parenteses desbalanceados." << std::endl;
         else
         {
-            Node *raiz = buildExpression(teste);
+            Node *raiz = buildExpression(test);
             std::cout << calculateResult(raiz) << std::endl;
         }
     }
