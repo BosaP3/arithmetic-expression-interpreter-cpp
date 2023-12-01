@@ -8,8 +8,10 @@ int main()
 {
     string user_input;
 
-    // Interface REPL (Read-Eval-Print-Loop)
-    cout << "OBS: Digite as expressoes usando espaços como delimitador. \n";
+    // Interface REPL (Read-Eval-Print-Loop)]
+    cout << "--------------------------------------------------------- \n";
+    cout << "OBS: Digite as expressoes usando espacos como delimitador. \n";
+    cout << "--------------------------------------------------------- \n";
     while (1)
     {
         cout << ">>> ";
