@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include <string>
 #include <sstream>
+#include <cctype>
 #include "expression_tree.cpp"
 
 std::unordered_map<std::string, std::string> variables;
@@ -8,9 +9,14 @@ std::unordered_map<std::string, std::string> variables;
 // Verifica se a entrada pode ser convertida para um double
 bool isNumber(const std::string &s)
 {
-    std::istringstream iss(s);
-    double value;
-    return iss >> value >> std::ws && iss.eof();
+    for (char c : s)
+    {
+        if (!isdigit(c))
+        {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 // Verifica se a entrada já foi mapeada
@@ -31,7 +37,7 @@ std::string validExpression(const std::string &input)
     std::string correct;
     std::string currentPart;
 
-    // Dividir a expressão pelos espaços
+    // Delimitar a expressão pelos espaços
     std::stringstream ss(input);
     std::string element;
 
@@ -65,7 +71,8 @@ std::string validExpression(const std::string &input)
             }
             else
             {
-                std::cerr << "Erro: Valor invalido encontrado." << std::endl;
+                std::cerr << "Erro: Valor invalido (" << element << ") encontrado." << std::endl;
+                return 0;
             }
         }
     }
@@ -109,9 +116,7 @@ void evaluation_Variable(const std::string &input)
 // Coordena a avaliação da entrada
 void evaluation(const std::string &input)
 {
-    if (isNumber(input)) // Numero
-        std::cout << input << std::endl;
-    else if (input.find('=') != std::string::npos) // Variavel
+    if (input.find('=') != std::string::npos) // Variavel
         evaluation_Variable(input);
     else if (variables.find(input) != variables.end()) // Chave mapeada
         std::cout << variables[input] << std::endl;
