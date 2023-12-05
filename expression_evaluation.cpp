@@ -30,7 +30,6 @@ bool isOperator(std::string str)
 std::string validExpression(const std::string &input)
 {
     std::string correct;
-    std::string currentPart;
 
     // Dividir a expressão pelos espaços
     std::stringstream ss(input);
@@ -90,12 +89,7 @@ void evaluation_Variable(const std::string &input)
     var.erase(var.find_last_not_of(" \t\n\r\f\v") + 1);
     value.erase(0, value.find_first_not_of(" \t\n\r\f\v"));
 
-    if (variables.find(value) != variables.end())
-    {
-        value = variables[value];
-        variables[var] = value;
-    }
-    else if (value.find_first_of("+-*/()") != std::string::npos)
+    if (value.find_first_of("+-*/()") != std::string::npos)
     {
         std::string test = validExpression(value);
         if (test == "ERRO1")
